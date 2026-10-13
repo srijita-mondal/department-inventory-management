@@ -1,4 +1,4 @@
-from .models import DepartmentMembership, RoleAssignment
+from .models import Department, DepartmentMembership, RoleAssignment
 
 GLOBAL_SCOPE_ROLES = {"SYSTEM_ADMIN"}
 
@@ -32,6 +32,11 @@ def is_department_member(user, department_id):
 def get_authorized_department_ids(user):
     if not is_active_user(user):
         return set()
+    global_admin = RoleAssignment.objects.filter(
+        user_id=user.pk, department__isnull=True, role__code="SYSTEM_ADMIN"
+    ).exists()
+    if global_admin:
+        return set(Department.objects.filter(status="ACTIVE").values_list("id", flat=True))
     assigned = RoleAssignment.objects.filter(user_id=user.pk, department_id__isnull=False).values_list("department_id", flat=True)
     memberships = DepartmentMembership.objects.filter(user_id=user.pk, status="ACTIVE").values_list("department_id", flat=True)
     return set(assigned).intersection(set(memberships))
