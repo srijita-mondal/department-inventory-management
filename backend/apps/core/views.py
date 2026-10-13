@@ -29,6 +29,7 @@ class CsrfView(APIView):
 class LoginThrottle(AnonRateThrottle):
     scope = "login"
 
+@method_decorator(csrf_protect, name="dispatch")
 class LoginView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
