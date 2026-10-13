@@ -8,6 +8,7 @@ Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
 if not DEBUG and (not SECRET_KEY or len(SECRET_KEY) < 50):
     raise RuntimeError("Set DJANGO_SECRET_KEY to a strong secret (at least 50 characters) outside DEBUG mode.")
 
