@@ -1,8 +1,10 @@
 """Environment-driven settings. Existing inventory tables are never migrated by Django."""
 import os
 from pathlib import Path
+from environ import Env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
