@@ -1,5 +1,7 @@
 # Department Inventory & Student Item Issue Management System
 
+> **New backend foundation:** the separate [`backend/`](backend/README.md) directory contains a Phase 1 Django + DRF + PostgreSQL authentication/RBAC foundation. The authoritative PostgreSQL schema and synthetic seed SQL are stored in [`inventory_seed_pack/`](inventory_seed_pack/README.md). The existing Flask/SQLite MVP remains in the repository as the current demo UI; it has not been silently replaced or connected to the new backend.
+
 A web-based inventory and borrowing tracker built around **Problem Statement #5**. It supports coordinator-managed stock, individually tracked assets, student borrowing, 15-calendar-day due dates, renewals requiring approval, partial returns, item condition tracking, and overdue monitoring.
 
 > **Status:** Functional starter MVP for development and demonstration. It uses SQLite and a small Flask application. Before production deployment, add institutional SSO, CSRF protection, database migrations, audit-log hardening, backups, and deployment secrets management.
@@ -116,6 +118,10 @@ Open http://127.0.0.1:5000.
     ├── DATA_MODEL.md
     └── ROADMAP.md
 ```
+
+## Secure Django backend (Phase 1)
+
+The Django backend is developed separately from the existing Flask MVP. It maps existing database tables as unmanaged models, adds session-based authentication endpoints, and reads application permissions from the SQL seed pack. It intentionally does not yet implement inventory transaction APIs. Follow [`backend/README.md`](backend/README.md) for setup, provisioning, CSRF, and security limitations. Do not run the SQL schema or seed scripts against a non-empty database.
 
 ## Git branching workflow
 
