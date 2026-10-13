@@ -1,28 +1,25 @@
-from django.db.models import Q
-from .models import DepartmentMembership, RoleAssignment, RolePermission
+from .models import DepartmentMembership, RoleAssignment
 
 GLOBAL_SCOPE_ROLES = {"SYSTEM_ADMIN"}
 
 def is_active_user(user):
     return bool(user and getattr(user, "is_authenticated", False) and user.account_status == "ACTIVE")
 
-def get_active_assignments(user):
-    if not is_active_user(user):
-        return RoleAssignment.objects.none()
-    return RoleAssignment.objects.filter(user_id=user.pk, role__role_permissions__isnull=False).select_related("role").distinct()
-
 def get_effective_permissions(user):
     if not is_active_user(user):
         return set()
-    assignments = get_active_assignments(user)
     codes = set()
+    assignments = RoleAssignment.objects.filter(user_id=user.pk).select_related("role").prefetch_related("role__role_permissions__permission")
     for assignment in assignments:
-        # Global scope is reserved for the explicit system-admin role. Other global
-        # assignments do not silently become institution-wide grants.
-        if assignment.department_id is None and assignment.role.code not in GLOBAL_SCOPE_ROLES:
+        if assignment.department_id is None:
+            if assignment.role.code not in GLOBAL_SCOPE_ROLES:
+                continue
+        elif not DepartmentMembership.objects.filter(
+            user_id=user.pk, department_id=assignment.department_id, status="ACTIVE"
+        ).exists():
             continue
-        permission_codes = RolePermission.objects.filter(role_id=assignment.role_id).values_list("permission__code", flat=True)
-        codes.update(permission_codes)
+        for link in assignment.role.role_permissions.all():
+            codes.add(link.permission.code)
     return codes
 
 def is_department_member(user, department_id):
@@ -46,9 +43,10 @@ def has_permission(user, permission_code, department_id=None):
         user_id=user.pk, role__role_permissions__permission__code=permission_code
     ).select_related("role").distinct()
     for assignment in assignments:
-        if assignment.department_id == department_id and department_id is not None:
+        if department_id is not None and assignment.department_id == department_id:
             if is_department_member(user, department_id):
                 return True
         elif assignment.department_id is None and assignment.role.code in GLOBAL_SCOPE_ROLES:
+            # Global scope is only effective for permissions explicitly granted to SYSTEM_ADMIN in the DB.
             return True
     return False
