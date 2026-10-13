@@ -1,4 +1,6 @@
 import logging
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
