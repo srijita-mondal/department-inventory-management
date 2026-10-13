@@ -76,8 +76,8 @@ class Permission(models.Model):
     class Meta: db_table = "permissions"; managed = False
 
 class RolePermission(models.Model):
-    role = models.ForeignKey(Role, db_column="role_id", on_delete=models.DO_NOTHING)
-    permission = models.ForeignKey(Permission, db_column="permission_id", on_delete=models.DO_NOTHING)
+    role = models.ForeignKey(Role, db_column="role_id", on_delete=models.DO_NOTHING, related_name="role_permissions")
+    permission = models.ForeignKey(Permission, db_column="permission_id", on_delete=models.DO_NOTHING, related_name="role_permissions")
     class Meta:
         db_table = "role_permissions"; managed = False
         unique_together = (("role", "permission"),)
